@@ -52,7 +52,7 @@ jobs:
       - name: Generate release tag
         id: tag
         run: |
-          tar -zcvf ${{env.WORK_PATH}}/sqlite_${{env.SQLITE_YEAR}}_${{env.SQLITE_VERSION}}.tar.gz libs
+          tar -zcvf sqlite_${{env.SQLITE_YEAR}}_${{env.SQLITE_VERSION}}.tar.gz libs
           echo "::set-output name=release_tag::${{env.SQLITE_VERSION}}"
           echo "::set-output name=status::success"
       
@@ -63,4 +63,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ steps.tag.outputs.release_tag }}
-          files: ${{env.WORK_PATH}}/sqlite_${{env.SQLITE_YEAR}}_${{env.SQLITE_VERSION}}.tar.gz
+          files: sqlite_${{env.SQLITE_YEAR}}_${{env.SQLITE_VERSION}}.tar.gz
