@@ -1,0 +1,60 @@
+# This is a basic workflow to help you get started with Actions
+
+name: release
+
+# Controls when the action will run. 
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+
+env:
+  NDK_HOME: "/usr/local/lib/android/sdk/ndk/25.2.9519653"
+  SQLITE_VERSION: "3420000"
+  SQLITE_YEAR: "2023"
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  pulish_sqlite:
+    name: compile
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $env.WORK_PATH, so your job can access it
+      - uses: actions/checkout@v3
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: "17"
+          distribution: "temurin"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Add ndk dir to path
+        shell: bash
+        run: |
+          echo "$ANDROID_SDK_ROOT/ndk/25.2.9519653" >> $GITHUB_PATH
+
+      - name: compile
+        run: make
+          
+      - name: Generate release tag
+        id: tag
+        run: |
+          tar -zcvf sqlite_${{env.SQLITE_YEAR}}_${{env.SQLITE_VERSION}}.tar.gz libs
+          echo "::set-output name=release_tag::${{env.SQLITE_VERSION}}"
+          echo "::set-output name=status::success"
+      
+      - name: Upload firmware to release
+        if: steps.tag.outputs.status == 'success' && !cancelled()
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          files: ${{env.WORK_PATH}}/sqlite_${{env.SQLITE_YEAR}}_${{env.SQLITE_VERSION}}.tar.gz
