@@ -42,11 +42,17 @@ jobs:
 
       - name: compile
         run: make
+      
+      - name: compile
+        run: ls -l
           
+      - name: compile
+        run: ls libs -l
+
       - name: Generate release tag
         id: tag
         run: |
-          tar -zcvf sqlite_${{env.SQLITE_YEAR}}_${{env.SQLITE_VERSION}}.tar.gz libs
+          tar -zcvf ${{env.WORK_PATH}}/sqlite_${{env.SQLITE_YEAR}}_${{env.SQLITE_VERSION}}.tar.gz libs
           echo "::set-output name=release_tag::${{env.SQLITE_VERSION}}"
           echo "::set-output name=status::success"
       
